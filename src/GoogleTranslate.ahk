@@ -29,11 +29,11 @@ ProcSubroutine:
     {
         ;translate("auto","zh-CN") ; single press
         Gui, MyGui:New
-        Gui, MyGui:Add, Text, , Source:
+        Gui, MyGui:Add, Text, , Source text:
         Gui, MyGui:Add, Edit, r9 w300, %Clipboard%
-        Gui, MyGui:Add, Text, , Fixed:
+        Gui, MyGui:Add, Text, , Do you want to translate:
         Gui, MyGui:Add, Edit, r9 w300, Hello World!
-        Gui, MyGui:Add, Text, ys, Target:
+        Gui, MyGui:Add, Text, ys, Target text:
         Gui, MyGui:Add, Edit, r9 w300, 你好世界！
         Gui, MyGui:Show
     }
