@@ -24,12 +24,14 @@ ProcSubroutine:
     {
         ; 第二类行为
         ;translate("auto","en") ; single press
+        googleTranslate := new GoogleTranslate()
+        googleTranslate.translate("auto","zh-CN")
     }
     Else If ctrl_cPressCount = 3
     {
         ;translate("auto","zh-CN") ; single press
         googleTranslate := new GoogleTranslate()
-        googleTranslate.translate()
+        googleTranslate.translate("auto","en")
     }
     Else
     {
@@ -117,7 +119,7 @@ class GoogleTranslate
         Return script
     }
 
-    translate()
+    translate(from := "auto", to := "zh-CN")
     {
         Clipboard := ""
         SendInput, ^c
@@ -136,7 +138,9 @@ class GoogleTranslate
         if (to == "en") ;translate other language to english
         {
             ; MsgBox, ,,% this.getGoogleTranslate(Clipboard,from,to).full, 3
-            this.showResultGUI(this.sourceText, clipboard, this.getGoogleTranslate(this.sourceText,from,to).full)
+            this.fixedText := clipboard
+            this.targetText := this.getGoogleTranslate(this.sourceText, from, to).full
+            ; this.showResultGUI(this.sourceText, clipboard, this.getGoogleTranslate(this.sourceText, from, to).full)
         }
         else ; translate other language to chinese or get chinese pinyin
         { 
@@ -148,8 +152,8 @@ class GoogleTranslate
                 if (b > 4) ;When string length is long, just show it. 
                     {
                         ; Msgbox, , , %clipboard%, 2
-                        this.fixedText := The text is too long!
-                        this.targetText := The text is too long!
+                        this.fixedText := "The text is too long!"
+                        this.targetText := "The text is too long!"
                         ; this.showResultGUI(this.sourceText, The text too long, The text too long)
                     }
                 else ;When string length is short, show it's pinyin.
@@ -189,6 +193,8 @@ class GoogleTranslate
         sJson := this.sendRequest(JS, str, to, from)
         oJSON := JSON.Parse(sJson)
         MsgBox, %sJson%
+        Gui, Add, Edit, r9 w300, %sJson%
+        Gui, show
         
         if !IsObject(oJSON[2]) {
             for k, v in oJSON[1]
