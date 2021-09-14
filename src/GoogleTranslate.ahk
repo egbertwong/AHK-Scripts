@@ -64,7 +64,7 @@ class GoogleTranslate
         body := "q=" . this.encodeUrl(str)
         contentType := "application/x-www-form-urlencoded;charset=utf-8"
         userAgent := "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0"
-        Return JSON.GetFromUrl(url, body, contentType, userAgent)
+        Return MyJson.GetFromUrl(url, body, contentType, userAgent)
     }
 
     encodeUrl(str, encoding := "UTF-8")
@@ -138,7 +138,7 @@ class GoogleTranslate
         if (to == "en") ;translate other language to english
         {
             ; MsgBox, ,,% this.getGoogleTranslate(Clipboard,from,to).full, 3
-            this.fixedText := clipboard
+            this.fixedText := this.getGoogleTranslate(this.sourceText, from, to).main
             this.targetText := this.getGoogleTranslate(this.sourceText, from, to).full
             ; this.showResultGUI(this.sourceText, clipboard, this.getGoogleTranslate(this.sourceText, from, to).full)
         }
@@ -159,8 +159,8 @@ class GoogleTranslate
                 else ;When string length is short, show it's pinyin.
                     {
                         ; MsgBox, , , % GoogleTranslate(Clipboard).pinyin, 3
-                        this.fixedText := clipboard
-                        this.targetText := this.getGoogleTranslate(Clipboard).pinyin
+                        this.fixedText := this.getGoogleTranslate(this.sourceText).main
+                        this.targetText := this.getGoogleTranslate(this.sourceText).pinyin
                         ; this.showResultGUI(clipboard, clipboard, this.getGoogleTranslate(Clipboard).pinyin)
                     }
             }
@@ -169,15 +169,15 @@ class GoogleTranslate
                 if (b < 30) ;When string length is short, show message box just 3 seconds.
                     {
                         ; MsgBox, , , % GoogleTranslate(Clipboard).full, 3
-                        this.fixedText := clipboard
-                        this.targetText := this.getGoogleTranslate(Clipboard).full
+                        this.fixedText := this.getGoogleTranslate(this.sourceText).main
+                        this.targetText := this.getGoogleTranslate(this.sourceText).full
                         ; this.showResultGUI(clipboard, clipboard, this.getGoogleTranslate(Clipboard).full)
                     }
                 else ; if not, show message unless user close it.
                     {
                         ; MsgBox, , , % GoogleTranslate(Clipboard).full,
-                        this.fixedText := clipboard
-                        this.targetText := this.getGoogleTranslate(Clipboard).full
+                        this.fixedText := this.getGoogleTranslate(this.sourceText).main
+                        this.targetText := this.getGoogleTranslate(this.sourceText).full
                         ; this.showResultGUI(clipboard, clipboard, this.getGoogleTranslate(Clipboard).full)
                     }
             }
@@ -187,11 +187,11 @@ class GoogleTranslate
 
     getGoogleTranslate(str, from := "auto", to := "zh-CN")
     {
-        JSON := new JSON
-        JS := JSON.JS, JS.( this.getJScript() )
+        MyJson := new MyJson
+        JS := MyJson.JS, JS.(this.getJScript())
         
         sJson := this.sendRequest(JS, str, to, from)
-        oJSON := JSON.Parse(sJson)
+        oJSON := MyJson.Parse(sJson)
         MsgBox, %sJson%
         Gui, Add, Edit, r9 w300, %sJson%
         Gui, show
@@ -217,12 +217,14 @@ class GoogleTranslate
         from := oJSON[3]    
         pinyin := oJSON[1,2,3]
         trans := Trim(trans, ",+`n ")
-        Return {main: MainTransText, full: trans, from: from , pinyin: pinyin}
+        
+        return {main: MainTransText, full: trans, from: from, pinyin: pinyin}
     }
 
     showResultGUI(source, fixed, target)
     {
         Gui, MyGui:New
+        Gui, font, s12, Microsoft YaHei
         Gui, MyGui:Add, Text, , Source text:
         Gui, MyGui:Add, Edit, r9 w300, %source%
         Gui, MyGui:Add, Text, , Do you want to translate this:
@@ -244,9 +246,9 @@ class GoogleTranslate
 
 
 
-class JSON
+class MyJson
 {
-    static JS := JSON._GetJScripObject()
+    static JS := MyJson._GetJScripObject()
     
     Parse(JsonString) {
         try oJSON := this.JS.("(" JsonString ")")
@@ -280,7 +282,7 @@ class JSON
         
         JS := ObjBindMethod(ComObjGet("script:" . tmpFile), "eval")
         FileDelete, % tmpFile
-        JSON._AddMethods(JS)
+        MyJson._AddMethods(JS)
         Return JS
     }
     
